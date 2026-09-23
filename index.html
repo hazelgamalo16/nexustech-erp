@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusTech PH | Enterprise ERP & HRIS Solutions by Hazel Gamalo</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        nexus: {
+                            dark: '#0B0F19',
+                            card: '#111827',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            cyan: '#00F0FF',
+                            purple: '#7C3AED',
+                            pink: '#EC4899'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React, ReactDOM, Babel, and Framer Motion CDNs -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F19;
+            color: #F3F4F6;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .text-glow-cyan { text-shadow: 0 0 15px rgba(0, 240, 255, 0.5); }
+        .text-glow-purple { text-shadow: 0 0 15px rgba(124, 58, 237, 0.5); }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0B0F19; }
+        ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #1F2937;
+            border-radius: 8px;
+            height: 8px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #00F0FF;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
+            border: 2px solid #0B0F19;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #proposal-printable, #proposal-printable * { visibility: visible; }
+            #proposal-printable { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; }
+        }
+    </style>
+</head>
+<body class="bg-nexus-dark text-gray-100 min-h-screen relative bg-grid-pattern antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useReducer, useEffect, useRef } = React;
+        const { motion } = window.Motion;
+
+        // Data Models
+        const comparisonData = {
+            all: [
+                { feature: "Multi-Branch Inventory Sync", offTheShelf: "Delayed / Batch-based", nexus: "<150ms Real-time Relay", tier: "Growth" },
+                { feature: "BIR Statutory Compliance", offTheShelf: "Manual Add-on", nexus: "100% Native (1601-C, 2316)", tier: "Starter" },
+                { feature: "Biometric Hardware Integration", offTheShelf: "Third-party Middleware", nexus: "Native Direct Connector", tier: "Starter" },
+                { feature: "Custom SLA & Enterprise Support", offTheShelf: "Email Ticket Queue", nexus: "24/7 Dedicated PH Engineers", tier: "Enterprise" },
+                { feature: "AI Tax & Payroll Automation", offTheShelf: "Not Available", nexus: "Integrated Anomaly Detection", tier: "Enterprise" }
+            ],
+            pos: [
+                { feature: "Multi-Branch Inventory Sync", offTheShelf: "Delayed / Batch-based", nexus: "<150ms Real-time Relay", tier: "Growth" },
+                { feature: "Offline Transaction Queuing", offTheShelf: "Limited to 100 txns", nexus: "Unlimited Local Storage", tier: "Growth" }
+            ],
+            hris: [
+                { feature: "BIR Statutory Compliance", offTheShelf: "Manual Add-on", nexus: "100% Native (1601-C, 2316)", tier: "Starter" },
+                { feature: "Biometric Hardware Integration", offTheShelf: "Third-party Middleware", nexus: "Native Direct Connector", tier: "Starter" },
+                { feature: "AI Tax & Payroll Automation", offTheShelf: "Not Available", nexus: "Integrated Anomaly Detection", tier: "Enterprise" }
+            ]
+        };
+
+        const testimonials = [
+            { text: '"Hazel Gamalo\'s architecture reduced our semi-monthly payroll processing time from 4 days to under 20 minutes across 12 Antipolo and Manila branch locations."', author: 'Maria Santos', role: 'VP of HR Operations — Rizal Retail Group' },
+            { text: '"Sub-150ms inventory sync completely eliminated stock discrepancies between our Antipolo warehouse and regional hubs."', author: 'Kenneth Tan', role: 'Chief Information Officer — Visayas Logistics Inc.' },
+            { text: '"100% BIR statutory compliance out of the box gave our accounting team full confidence during tax auditing season."', author: 'Atty. Sofia Reyes', role: 'Head of Finance — Apex Enterprise Group' }
+        ];
+
+        // 1. Hero Component with Framer Motion Entrance Animations
+        function HeroSection({ openVIPModal }) {
+            return (
+                <section id="hero" class="relative pt-6 pb-12 overflow-hidden">
+                    <div class="absolute -top-24 -left-24 w-96 h-96 bg-nexus-purple/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute top-1/2 -right-24 w-96 h-96 bg-nexus-cyan/15 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="grid lg:grid-cols-12 gap-12 items-center">
+                        <motion.div 
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8 }}
+                            class="lg:col-span-7 space-y-6"
+                        >
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-card border border-nexus-cyan/30 text-xs font-medium text-nexus-cyan">
+                                <span class="w-2 h-2 rounded-full bg-nexus-cyan animate-pulse"></span>
+                                <span>Designed by Hazel Gamalo | Localized for Enterprise PH Standards</span>
+                            </div>
+
+                            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+                                Next-Generation ERP & HRIS Engineered for <span class="bg-clip-text text-transparent bg-gradient-to-r from-nexus-cyan via-blue-400 to-nexus-purple text-glow-cyan">Growing PH Businesses</span>
+                            </h1>
+
+                            <p class="text-base sm:text-lg text-gray-300 leading-relaxed">
+                                Eliminate manual payroll calculations and disconnected branch inventories. Architected by <strong>Hazel Gamalo</strong>, NexusTech unifies multi-site operations into one real-time cloud platform.
+                            </p>
+
+                            <div class="flex flex-wrap items-center gap-4 pt-2">
+                                <button onClick={openVIPModal} class="px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-nexus-cyan to-nexus-purple text-nexus-dark hover:brightness-110 shadow-xl shadow-nexus-cyan/25 transition-all flex items-center gap-3 group">
+                                    <span>Request Enterprise Trial</span>
+                                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                </button>
+                                <a href="#roi-calculator" class="px-6 py-4 rounded-xl text-sm font-semibold glass-card hover:bg-white/10 transition-all flex items-center gap-2 text-gray-200">
+                                    <i class="fa-solid fa-calculator text-nexus-cyan"></i> Calculate PH Savings
+                                </a>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
+                                <div>
+                                    <p class="text-2xl sm:text-3xl font-extrabold text-nexus-cyan font-mono">99.98%</p>
+                                    <p class="text-xs text-gray-400">Payroll Computation Accuracy</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl sm:text-3xl font-extrabold text-nexus-purple font-mono">&lt; 150ms</p>
+                                    <p class="text-xs text-gray-400">Branch Inventory Sync Speed</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl sm:text-3xl font-extrabold text-pink-400 font-mono">100% BIR</p>
+                                    <p class="text-xs text-gray-400">Form 1601-C & 2316 Compliant</p>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            class="lg:col-span-5"
+                        >
+                            <div class="glass-panel rounded-2xl p-6 border border-white/10 shadow-2xl relative">
+                                <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+                                        <span class="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+                                        <span class="w-3 h-3 rounded-full bg-green-500/80"></span>
+                                        <span class="text-xs font-mono text-gray-400 ml-2">ph-relay-main-01.nexustech.ph</span>
+                                    </div>
+                                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">LIVE</span>
+                                </div>
+
+                                <div class="py-6 space-y-4">
+                                    <div class="bg-nexus-card/80 rounded-xl p-4 border border-white/5 space-y-2">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-gray-400">Multi-Site Inventory Sync (Regional)</span>
+                                            <span class="text-nexus-cyan font-mono">142 ms</span>
+                                        </div>
+                                        <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-nexus-cyan h-full rounded-full w-4/5 animate-pulse"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-nexus-card/80 rounded-xl p-4 border border-white/5 space-y-2">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-gray-400">HRIS Biometric Timekeeping Engine</span>
+                                            <span class="text-nexus-purple font-mono">4,820 logs/sec</span>
+                                        </div>
+                                        <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-nexus-purple h-full rounded-full w-3/4"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-nexus-card/80 rounded-xl p-4 border border-white/5 space-y-2">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-gray-400">BIR Statutory Deduction Calculation</span>
+                                            <span class="text-green-400 font-mono">SSS / PhilHealth / Pag-IBIG Ready</span>
+                                        </div>
+                                        <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-green-400 h-full rounded-full w-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 flex items-center justify-between text-xs text-gray-400 border-t border-white/5 font-mono">
+                                    <span><i class="fa-solid fa-server text-nexus-cyan mr-1"></i> Architect: Hazel Gamalo</span>
+                                    <span>AES-256 Encrypted</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </section>
+            );
+        }
+
+        // 2. Interactive ROI Calculator with explicit useReducer State Machine (Case Study Requirement)
+        const roiInitialState = { headcount: 120, branches: 8 };
+        function roiReducer(state, action) {
+            switch (action.type) {
+                case 'SET_HEADCOUNT': return { ...state, headcount: action.payload };
+                case 'SET_BRANCHES': return { ...state, branches: action.payload };
+                default: return state;
+            }
+        }
+
+        function InteractiveROICalculator({ openVIPModal }) {
+            const [state, dispatch] = useReducer(roiReducer, roiInitialState);
+
+            const hoursSaved = (state.branches * 14 * 12) + (state.headcount * 8);
+            const netSavings = hoursSaved * 180; // PHP 180 hourly rate average
+
+            return (
+                <section id="roi-calculator" class="space-y-6">
+                    <div class="text-center max-w-2xl mx-auto space-y-2">
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Interactive ROI & Operational Savings Calculator</h2>
+                        <p class="text-xs sm:text-sm text-gray-400">Powered by React useReducer state machine recalculating monetary savings live on input change.</p>
+                    </div>
+
+                    <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 grid lg:grid-cols-12 gap-8 items-center">
+                        <div class="lg:col-span-7 space-y-6">
+                            <div>
+                                <div class="flex justify-between text-xs sm:text-sm font-medium mb-2">
+                                    <span>Total Employee Headcount</span>
+                                    <span class="text-nexus-cyan font-mono font-bold">{state.headcount} Employees</span>
+                                </div>
+                                <input 
+                                    type="range" min="10" max="1000" step="10" value={state.headcount} 
+                                    onChange={(e) => dispatch({ type: 'SET_HEADCOUNT', payload: Number(e.target.value) })}
+                                    class="w-full"
+                                />
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs sm:text-sm font-medium mb-2">
+                                    <span>Operational Branches / Outlets</span>
+                                    <span class="text-nexus-purple font-mono font-bold">{state.branches} Outlets</span>
+                                </div>
+                                <input 
+                                    type="range" min="1" max="50" step="1" value={state.branches} 
+                                    onChange={(e) => dispatch({ type: 'SET_BRANCHES', payload: Number(e.target.value) })}
+                                    class="w-full"
+                                />
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 space-y-1">
+                                <div class="flex items-center gap-2 text-nexus-cyan font-semibold">
+                                    <i class="fa-solid fa-calculator"></i> PH Operational Baseline Formula
+                                </div>
+                                <p>Based on average Philippine admin labor (~₱180/hr) and 14 manual reconciliation hours saved per outlet each month across national networks.</p>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-5 glass-card p-6 rounded-xl border border-nexus-cyan/30 text-center space-y-6">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-gray-400">Estimated Annual Hours Saved</span>
+                                <p class="text-3xl font-extrabold font-mono text-white mt-1">{hoursSaved.toLocaleString()} hrs/yr</p>
+                            </div>
+
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-gray-400">Estimated Net Annual Savings</span>
+                                <p class="text-4xl font-extrabold font-mono text-nexus-cyan text-glow-cyan mt-1">₱ {netSavings.toLocaleString()}</p>
+                            </div>
+
+                            <button onClick={openVIPModal} class="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-nexus-cyan to-nexus-purple text-nexus-dark hover:brightness-110 transition-all">
+                                Get Custom Enterprise Quote
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // 3. Dynamic Dynamic Feature Comparison Matrix Component (Case Study Requirement)
+        function FeatureComparisonMatrix() {
+            const [filter, setFilter] = useState('all');
+
+            return (
+                <section id="comparison-matrix" class="space-y-6">
+                    <div class="text-center max-w-2xl mx-auto space-y-2">
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Feature Comparison Matrix</h2>
+                        <p class="text-xs sm:text-sm text-gray-400">Filterable JSON data rendering dynamic tabbed comparison tables comparing legacy off-the-shelf software to NexusTech.</p>
+                    </div>
+
+                    <div class="flex justify-center gap-2 mb-4">
+                        {['all', 'pos', 'hris'].map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setFilter(cat)}
+                                class={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${filter === cat ? 'bg-nexus-cyan text-nexus-dark' : 'glass-card text-gray-400 hover:text-white'}`}
+                            >
+                                {cat === 'all' ? 'All Modules' : cat.toUpperCase() + ' Suite'}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div class="glass-panel rounded-2xl overflow-hidden border border-white/10">
+                        <table class="w-full text-left text-xs sm:text-sm font-mono">
+                            <thead class="bg-white/5 text-gray-400 uppercase border-b border-white/10">
+                                <tr>
+                                    <th class="p-4">Enterprise Capability</th>
+                                    <th class="p-4">Off-The-Shelf HRIS/POS</th>
+                                    <th class="p-4 text-nexus-cyan">NexusTech Modular Suite</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                {comparisonData[filter].map((row, idx) => (
+                                    <tr key={idx} class="hover:bg-white/5 transition-colors">
+                                        <td class="p-4 font-semibold text-white">{row.feature}</td>
+                                        <td class="p-4 text-gray-400">{row.offTheShelf}</td>
+                                        <td class="p-4 text-nexus-cyan font-bold">{row.nexus}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            );
+        }
+
+        // 4. Client Proof Auto-Play Carousel Component (Case Study Requirement)
+        function ClientProofCarousel() {
+            const [index, setIndex] = useState(0);
+            const [isPaused, setIsPaused] = useState(false);
+
+            useEffect(() => {
+                if (isPaused) return;
+                const timer = setInterval(() => {
+                    setIndex((prev) => (prev + 1) % testimonials.length);
+                }, 4000);
+                return () => clearInterval(timer);
+            }, [isPaused]);
+
+            return (
+                <section id="social-proof" class="space-y-6">
+                    <div class="text-center max-w-2xl mx-auto space-y-2">
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Trusted by Leading Philippine Enterprises</h2>
+                        <p class="text-xs sm:text-sm text-gray-400">State carousel auto-playing with hover pause listener.</p>
+                    </div>
+
+                    <div 
+                        class="glass-panel p-6 rounded-2xl border border-white/10 relative overflow-hidden"
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                    >
+                        <div class="text-center space-y-4 min-h-[120px] flex flex-col justify-center">
+                            <p class="text-sm sm:text-base italic text-gray-200">{testimonials[index].text}</p>
+                            <div>
+                                <h4 class="text-xs font-bold text-nexus-cyan">{testimonials[index].author}</h4>
+                                <p class="text-[10px] text-gray-400 font-mono">{testimonials[index].role}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // 5. Sticky Configurator Bar Controlled by Scroll Listener (Case Study Requirement)
+        function StickyConfiguratorBar({ addons, openVIPModal }) {
+            const [visible, setVisible] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setVisible(window.scrollY > 400);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const activeSummary = Object.keys(addons).filter(k => addons[k]).join(', ') || 'Core Standard Suite';
+
+            return (
+                <div class={`fixed bottom-0 left-0 w-full glass-panel border-t border-nexus-cyan/30 py-3 px-4 z-30 transform transition-transform duration-300 ${visible ? 'translate-y-0' : 'translate-y-full'}`}>
+                    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2.5 h-2.5 rounded-full bg-nexus-cyan animate-pulse"></div>
+                            <span class="text-xs font-medium text-white">Active Configuration: <span class="text-nexus-cyan font-mono">{activeSummary}</span></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onClick={() => window.print()} class="px-3 py-1.5 rounded-lg text-xs font-semibold text-nexus-cyan border border-nexus-cyan/30 hover:bg-nexus-cyan/10">
+                                <i class="fa-solid fa-file-pdf"></i> Export Proposal PDF
+                            </button>
+                            <button onClick={openVIPModal} class="px-4 py-1.5 rounded-lg text-xs font-bold bg-nexus-cyan text-nexus-dark hover:brightness-110">
+                                Claim VIP Trial
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Main App Orchestrator Component
+        function App() {
+            const [modalOpen, setModalOpen] = useState(false);
+            const [modalStep, setModalStep] = useState(1);
+            const [addons, setAddons] = useState({ bio: false, relay: false, tax: false });
+
+            const addonFee = (addons.bio ? 2500 : 0) + (addons.relay ? 4000 : 0) + (addons.tax ? 3500 : 0);
+
+            return (
+                <div class="pb-28">
+                    {/* Header */}
+                    <header class="sticky top-0 z-40 glass-panel border-b border-white/10 px-4 lg:px-8 py-3.5">
+                        <div class="max-w-7xl mx-auto flex items-center justify-between">
+                            <a href="#" class="flex items-center gap-3 group">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-nexus-cyan via-nexus-purple to-nexus-pink p-0.5 flex items-center justify-center shadow-lg shadow-nexus-cyan/20">
+                                    <div class="w-full h-full bg-nexus-dark rounded-[10px] flex items-center justify-center">
+                                        <i class="fa-solid fa-cubes text-nexus-cyan text-lg group-hover:rotate-12 transition-transform"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-nexus-cyan">
+                                        NexusTech
+                                    </span>
+                                    <span class="hidden sm:inline-block text-[10px] uppercase tracking-widest px-1.5 py-0.5 ml-2 bg-nexus-cyan/10 text-nexus-cyan border border-nexus-cyan/20 rounded-md font-mono">
+                                        Hazel Gamalo
+                                    </span>
+                                </div>
+                            </a>
+
+                            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
+                                <a href="#hero" class="hover:text-nexus-cyan transition-colors">Overview</a>
+                                <a href="#roi-calculator" class="hover:text-nexus-cyan transition-colors">ROI Calculator</a>
+                                <a href="#comparison-matrix" class="hover:text-nexus-cyan transition-colors">Matrix</a>
+                                <a href="#modules" class="hover:text-nexus-cyan transition-colors">Modules & Add-ons</a>
+                                <a href="#social-proof" class="hover:text-nexus-cyan transition-colors">Clients</a>
+                            </nav>
+
+                            <div class="flex items-center gap-3">
+                                <button onClick={() => window.print()} class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-nexus-cyan bg-nexus-cyan/10 border border-nexus-cyan/30 hover:bg-nexus-cyan/20 transition-all">
+                                    <i class="fa-solid fa-file-invoice"></i> Export Proposal
+                                </button>
+                                <button onClick={() => setModalOpen(true)} class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-nexus-cyan to-nexus-purple text-nexus-dark hover:brightness-110 shadow-lg shadow-nexus-cyan/20 transition-all transform hover:scale-105">
+                                    Start VIP Trial
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main class="max-w-7xl mx-auto px-4 lg:px-8 space-y-24 py-12">
+                        <HeroSection openVIPModal={() => setModalOpen(true)} />
+                        <InteractiveROICalculator openVIPModal={() => setModalOpen(true)} />
+                        <FeatureComparisonMatrix />
+
+                        {/* Interactive Add-on & Module Configurator */}
+                        <section id="modules" class="space-y-8">
+                            <div class="text-center max-w-2xl mx-auto space-y-2">
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Interactive Module Configurator & Pricing</h2>
+                                <p class="text-xs sm:text-sm text-gray-400">Toggle optional add-ons to observe real-time feature matrix adjustments.</p>
+                            </div>
+
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <label class="glass-card p-4 rounded-xl flex items-center justify-between cursor-pointer border border-white/10 hover:border-nexus-cyan">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-fingerprint text-nexus-cyan text-lg"></i>
+                                        <div>
+                                            <p class="text-sm font-bold text-white">Biometric Hardware Sync</p>
+                                            <p class="text-[11px] text-gray-400">+₱2,500 / mo</p>
+                                        </div>
+                                    </div>
+                                    <input 
+                                        type="checkbox" checked={addons.bio} 
+                                        onChange={(e) => setAddons({ ...addons, bio: e.target.checked })} 
+                                        class="w-5 h-5 accent-cyan-400 cursor-pointer" 
+                                    />
+                                </label>
+
+                                <label class="glass-card p-4 rounded-xl flex items-center justify-between cursor-pointer border border-white/10 hover:border-nexus-cyan">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-network-wired text-nexus-purple text-lg"></i>
+                                        <div>
+                                            <p class="text-sm font-bold text-white">Multi-Branch Cloud Relay</p>
+                                            <p class="text-[11px] text-gray-400">+₱4,000 / mo</p>
+                                        </div>
+                                    </div>
+                                    <input 
+                                        type="checkbox" checked={addons.relay} 
+                                        onChange={(e) => setAddons({ ...addons, relay: e.target.checked })} 
+                                        class="w-5 h-5 accent-purple-500 cursor-pointer" 
+                                    />
+                                </label>
+
+                                <label class="glass-card p-4 rounded-xl flex items-center justify-between cursor-pointer border border-white/10 hover:border-nexus-cyan">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-robot text-pink-400 text-lg"></i>
+                                        <div>
+                                            <p class="text-sm font-bold text-white">AI BIR Tax Automation</p>
+                                            <p class="text-[11px] text-gray-400">+₱3,500 / mo</p>
+                                        </div>
+                                    </div>
+                                    <input 
+                                        type="checkbox" checked={addons.tax} 
+                                        onChange={(e) => setAddons({ ...addons, tax: e.target.checked })} 
+                                        class="w-5 h-5 accent-pink-500 cursor-pointer" 
+                                    />
+                                </label>
+                            </div>
+
+                            <div class="grid lg:grid-cols-3 gap-6">
+                                <div class="glass-card rounded-2xl p-6 border border-white/10 flex flex-col justify-between space-y-6">
+                                    <div class="space-y-4">
+                                        <span class="text-xs font-mono text-gray-400 uppercase tracking-widest">Starter Tier</span>
+                                        <h3 class="text-xl font-bold text-white">Core HRIS & Payroll</h3>
+                                        <div class="text-3xl font-extrabold font-mono text-white">
+                                            ₱{(12500 + addonFee).toLocaleString()}<span class="text-xs text-gray-400 font-normal">/mo</span>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setModalOpen(true)} class="w-full py-3 rounded-xl text-xs font-bold uppercase bg-white/10 hover:bg-white/20 text-white transition-all">Select Plan</button>
+                                </div>
+
+                                <div class="glass-card rounded-2xl p-6 border border-nexus-cyan/50 relative flex flex-col justify-between space-y-6 bg-nexus-cyan/5">
+                                    <span class="absolute -top-3 right-6 bg-nexus-cyan text-nexus-dark text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Most Popular</span>
+                                    <div class="space-y-4">
+                                        <span class="text-xs font-mono text-nexus-cyan uppercase tracking-widest">Growth Tier</span>
+                                        <h3 class="text-xl font-bold text-white">POS & Inventory Relay</h3>
+                                        <div class="text-3xl font-extrabold font-mono text-nexus-cyan">
+                                            ₱{(18000 + addonFee).toLocaleString()}<span class="text-xs text-gray-400 font-normal">/mo</span>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setModalOpen(true)} class="w-full py-3 rounded-xl text-xs font-bold uppercase bg-nexus-cyan text-nexus-dark hover:brightness-110 transition-all shadow-lg shadow-nexus-cyan/20">Select Plan</button>
+                                </div>
+
+                                <div class="glass-card rounded-2xl p-6 border border-nexus-purple/50 flex flex-col justify-between space-y-6">
+                                    <div class="space-y-4">
+                                        <span class="text-xs font-mono text-nexus-purple uppercase tracking-widest">Enterprise Tier</span>
+                                        <h3 class="text-xl font-bold text-white">Full ERP Suite</h3>
+                                        <div class="text-3xl font-extrabold font-mono text-nexus-purple">
+                                            ₱{(24500 + addonFee).toLocaleString()}<span class="text-xs text-gray-400 font-normal">/mo</span>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setModalOpen(true)} class="w-full py-3 rounded-xl text-xs font-bold uppercase bg-nexus-purple text-white hover:bg-nexus-purple/80 transition-all">Select Plan</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <ClientProofCarousel />
+                    </main>
+
+                    {/* Footer */}
+                    <footer class="border-t border-white/10 py-8 glass-panel mt-12">
+                        <div class="max-w-7xl mx-auto px-4 lg:px-8 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-400 font-mono">
+                            <div>
+                                <p><i class="fa-solid fa-code text-nexus-cyan mr-1.5"></i> Lead Systems Architect: <span class="text-white font-bold">Hazel Gamalo</span></p>
+                                <p class="text-[11px] text-gray-500 mt-1">Republic of the Philippines Enterprise Compliance Edition</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span>&copy; 2026 NexusTech B2B Solutions</span>
+                            </div>
+                        </div>
+                    </footer>
+
+                    <StickyConfiguratorBar addons={addons} openVIPModal={() => setModalOpen(true)} />
+
+                    {/* VIP Access Modal */}
+                    {modalOpen && (
+                        <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+                            <div class="glass-panel max-w-lg w-full rounded-2xl border border-white/10 p-6 space-y-6 relative">
+                                <button onClick={() => setModalOpen(false)} class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+
+                                <div class="space-y-1">
+                                    <h3 class="text-lg font-bold text-white">Initialize 14-Day Enterprise VIP Instance</h3>
+                                    <p class="text-xs text-gray-400">Step {modalStep} of 2: {modalStep === 1 ? 'Enterprise Contact Information' : 'Technical Stack Details'}</p>
+                                </div>
+
+                                {modalStep === 1 ? (
+                                    <form onSubmit={(e) => { e.preventDefault(); setModalStep(2); }} class="space-y-4">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-300 mb-1">Company Domain / Name</label>
+                                            <input type="text" required placeholder="company.ph" class="w-full bg-nexus-card border border-white/10 rounded-lg p-2.5 text-xs text-white focus:border-nexus-cyan focus:outline-none" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-300 mb-1">Corporate Email Address</label>
+                                            <input type="email" required placeholder="admin@company.ph" class="w-full bg-nexus-card border border-white/10 rounded-lg p-2.5 text-xs text-white focus:border-nexus-cyan focus:outline-none" />
+                                        </div>
+                                        <button type="submit" class="w-full py-2.5 rounded-lg text-xs font-bold uppercase bg-nexus-cyan text-nexus-dark hover:brightness-110">
+                                            Next: Technical Requirements <i class="fa-solid fa-arrow-right ml-1"></i>
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <form onSubmit={(e) => { e.preventDefault(); alert('VIP Instance Provisioned! Check corporate email.'); setModalOpen(false); setModalStep(1); }} class="space-y-4">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-300 mb-1">Current Enterprise Stack</label>
+                                            <select class="w-full bg-nexus-card border border-white/10 rounded-lg p-2.5 text-xs text-white focus:border-nexus-cyan focus:outline-none">
+                                                <option>Legacy Desktop Software</option>
+                                                <option>Manual Spreadsheets (Excel / Google Sheets)</option>
+                                                <option>Third-Party Cloud Provider</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button type="button" onClick={() => setModalStep(1)} class="w-1/3 py-2.5 rounded-lg text-xs font-bold border border-white/10 text-gray-300 hover:bg-white/5">Back</button>
+                                            <button type="submit" class="w-2/3 py-2.5 rounded-lg text-xs font-bold uppercase bg-gradient-to-r from-nexus-cyan to-nexus-purple text-nexus-dark hover:brightness-110">
+                                                Provision VIP Sandbox
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Hidden Printable Container for Instant PDF Generator */}
+                    <div id="proposal-printable" class="hidden">
+                        <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>NexusTech PH — Custom Proposal</h1>
+                        <p>Architected by: Hazel Gamalo</p>
+                        <hr style={{ margin: '15px 0' }} />
+                        <h3>Selected Add-ons</h3>
+                        <p>{Object.keys(addons).filter(k => addons[k]).join(', ') || 'Base Configuration'}</p>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
